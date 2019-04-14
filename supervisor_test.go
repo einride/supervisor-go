@@ -9,10 +9,10 @@ import (
 	"github.com/einride/clock-go/pkg/mockclock"
 	"github.com/einride/supervisor-go/internal/gomockextra"
 	"github.com/golang/mock/gomock"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
+	"golang.org/x/xerrors"
 )
 
 const mockNowNanos = 1234
@@ -62,7 +62,7 @@ func TestSupervisor_RestartOnError(t *testing.T) {
 	rendezvousChan := make(chan struct{})
 	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
 		rendezvousChan <- struct{}{}
-		return errors.New("boom")
+		return xerrors.New("boom")
 	}))
 	statusUpdateChan := make(chan StatusUpdate, 6)
 	cfg.StatusUpdateListeners = append(cfg.StatusUpdateListeners, func(statusUpdates []StatusUpdate) {
@@ -96,7 +96,7 @@ func TestSupervisor_RestartOnPanic(t *testing.T) {
 	rendezvousChan := make(chan struct{})
 	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
 		rendezvousChan <- struct{}{}
-		panic(errors.New("boom"))
+		panic(xerrors.New("boom"))
 	}))
 	statusUpdateChan := make(chan StatusUpdate, 6)
 	cfg.StatusUpdateListeners = append(cfg.StatusUpdateListeners, func(statusUpdates []StatusUpdate) {
@@ -133,7 +133,7 @@ func TestSupervisor_ReportTransientError(t *testing.T) {
 		require.Equal(t, "service1", statusUpdates[0].ServiceName)
 		statusUpdateChan <- statusUpdates[0]
 	})
-	transientError := errors.New("boom")
+	transientError := xerrors.New("boom")
 	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
 		require.NoError(t, ReportTransientError(ctx, transientError))
 		require.NoError(t, ReportTransientError(ctx, nil))
