@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/einride/clock-go/pkg/clock"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 )
 
 // Config contains the full set of dependencies for a supervisor.
@@ -106,7 +106,7 @@ type contextValue struct {
 func ReportTransientError(ctx context.Context, err error) error {
 	valueOrNil := ctx.Value(contextKey{})
 	if valueOrNil == nil {
-		return errors.New("non-supervisor context")
+		return xerrors.New("non-supervisor context")
 	}
 	value := valueOrNil.(contextValue)
 	status := StatusRunning
@@ -146,9 +146,9 @@ func (s *Supervisor) start(ctx context.Context, ss *supervisedService) {
 			if r := recover(); r != nil {
 				var err error
 				if errPanic, ok := r.(error); ok {
-					err = errors.Wrap(errPanic, "panic")
+					err = xerrors.Errorf("panic: %w", errPanic)
 				} else {
-					err = errors.Errorf("panic: %v", r)
+					err = xerrors.Errorf("panic: %v", r)
 				}
 				s.statusUpdateChan <- StatusUpdate{
 					ServiceID:   ss.id,
