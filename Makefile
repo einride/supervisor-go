@@ -1,10 +1,12 @@
 # all: all tasks required for a complete build
 .PHONY: all
 all: circleci-config-validate \
+	go-generate \
 	go-lint \
 	go-review \
 	go-test \
 	go-mod-tidy \
+	git-verify-nodiff
 
 # clean: remove generated build files
 .PHONY: clean
@@ -42,6 +44,13 @@ go-lint: $(GOLANGCI_LINT) $(GOFUMPORTS)
 		echo "$$not_formatted"; \
 		exit 1; \
 	fi
+
+# go-generate: generate Go code using `go generate`
+.PHONY: go-generate
+go-generate: status_string.go
+
+status_string.go: status.go
+	go generate $<
 
 # go-review: review Go code with goreview
 .PHONY: go-review

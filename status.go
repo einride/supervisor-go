@@ -3,7 +3,7 @@ package supervisor
 // Status models the current status of a service.
 type Status uint8
 
-//go:generate stringer -type Status -trimprefix Status
+//go:generate gobin -m -run golang.org/x/tools/cmd/stringer -type Status -trimprefix Status
 
 const (
 	// StatusIdle is when a service is waiting to be scheduled by the OS scheduler.

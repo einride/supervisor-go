@@ -4,6 +4,19 @@ package supervisor
 
 import "strconv"
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[StatusIdle-0]
+	_ = x[StatusInitializing-1]
+	_ = x[StatusRunning-2]
+	_ = x[StatusTransientError-3]
+	_ = x[StatusStopped-4]
+	_ = x[StatusError-5]
+	_ = x[StatusPanic-6]
+}
+
 const _Status_name = "IdleInitializingRunningTransientErrorStoppedErrorPanic"
 
 var _Status_index = [...]uint8{0, 4, 16, 23, 37, 44, 49, 54}
