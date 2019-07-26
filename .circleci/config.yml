@@ -1,0 +1,22 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.12-stretch-node
+    steps:
+      - checkout
+      - run: make build
+      - restore_cache:
+          - keys:
+              build-files-cache-{{ checksum ".git/modules/build/HEAD" }}
+              build-files-cache-
+      - run: make
+      - save_cache:
+          key: build-files-cache-{{ checksum ".git/modules/build/HEAD" }}
+          paths: [build/files]
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - build
