@@ -34,16 +34,8 @@ go-mod-tidy:
 	go mod tidy
 
 # go-lint: lint Go code with GolangCI-Lint
-go-lint: $(GOLANGCI_LINT) $(GOFUMPORTS)
+go-lint: $(GOLANGCI_LINT) gofumports-verify-format
 	$(GOLANGCI_LINT) run --enable-all --skip-dirs build
-	@set -e; \
-	go_files=$$(git ls-files --exclude-standard --cached --others '*.go'); \
-	not_formatted=$$($(GOFUMPORTS) -l $$go_files); \
-	if ! test -z "$$not_formatted"; then \
-		echo 'Files not `gofumports`-ed:'; \
-		echo "$$not_formatted"; \
-		exit 1; \
-	fi
 
 # go-generate: generate Go code using `go generate`
 .PHONY: go-generate
