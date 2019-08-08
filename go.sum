@@ -1,8 +1,8 @@
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/einride/clock-go v0.0.0-20190726071639-011ea39fc136 h1:2Ef8xmHaRxMaeE+m3H7wW9trGpC7Zl03zwuQclkccPA=
-github.com/einride/clock-go v0.0.0-20190726071639-011ea39fc136/go.mod h1:3JVJrr6wRLIHkEZSrPUJZgdQuPZJzJzEqtof/IMCFrw=
+github.com/einride/clock-go v0.1.0 h1:Hd1jU0fbIKThaG/hPhQG0JOkSdWZy3nwqT4Cfsnormk=
+github.com/einride/clock-go v0.1.0/go.mod h1:3JVJrr6wRLIHkEZSrPUJZgdQuPZJzJzEqtof/IMCFrw=
 github.com/golang/mock v1.3.1 h1:qGJ6qTW+x6xX/my+8YUVl4WNpX9B7+/l2tRsHGZ7f2s=
 github.com/golang/mock v1.3.1/go.mod h1:sBzyDLLjw3U8JLTeZvSv8jJB+tU5PVekmnlKIyFUx0Y=
 github.com/golang/protobuf v1.3.2 h1:6nsPYzhq5kReh6QImI3k5qWzO4PEbvbIW2cwSfR/6xs=
