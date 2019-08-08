@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/einride/clock-go v0.0.0-20190726071639-011ea39fc136
+	github.com/einride/clock-go v0.1.0
 	github.com/golang/mock v1.3.1
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/stretchr/testify v1.3.0
