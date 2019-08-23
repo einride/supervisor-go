@@ -185,8 +185,8 @@ func newTestFixture(t *testing.T, cfg *Config) (*testFixture, func()) {
 		restartTicker:   mockclock.NewMockTicker(mockCtrl),
 		restartTickChan: make(chan time.Time),
 	}
-	cfg.RestartInternal = time.Second
-	f.clock.EXPECT().NewTicker(cfg.RestartInternal).Return(f.restartTicker)
+	cfg.RestartInterval = time.Second
+	f.clock.EXPECT().NewTicker(cfg.RestartInterval).Return(f.restartTicker)
 	f.clock.EXPECT().Now().Return(time.Unix(0, mockNowNanos)).AnyTimes()
 	f.restartTicker.EXPECT().C().Return(f.restartTickChan)
 	f.restartTicker.EXPECT().Stop()
