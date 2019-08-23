@@ -17,7 +17,7 @@ import (
 type Config struct {
 	Services              []Service
 	StatusUpdateListeners []func([]StatusUpdate)
-	RestartInternal       time.Duration
+	RestartInterval       time.Duration
 	Clock                 clock.Clock
 	Logger                *zap.Logger
 }
@@ -63,7 +63,7 @@ func (s *Supervisor) Start(ctx context.Context) error {
 	}
 	s.notifyListeners()
 	// monitor running services
-	restartTicker := s.cfg.Clock.NewTicker(s.cfg.RestartInternal)
+	restartTicker := s.cfg.Clock.NewTicker(s.cfg.RestartInterval)
 	restartTickChan := restartTicker.C()
 	ctxDone := ctx.Done()
 	for {
