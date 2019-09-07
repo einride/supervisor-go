@@ -71,7 +71,7 @@ func (s *Supervisor) Start(ctx context.Context) error {
 		case <-restartTickChan:
 			for id, update := range s.latestStatusUpdates {
 				if !update.Status.IsAlive() {
-					s.cfg.Logger.Debug(
+					s.cfg.Logger.Info(
 						"Restarting service",
 						zap.String("serviceName", update.ServiceName),
 						zap.Int("serviceID", update.ServiceID),
