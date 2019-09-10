@@ -11,15 +11,14 @@ func _() {
 	_ = x[StatusIdle-0]
 	_ = x[StatusInitializing-1]
 	_ = x[StatusRunning-2]
-	_ = x[StatusTransientError-3]
-	_ = x[StatusStopped-4]
-	_ = x[StatusError-5]
-	_ = x[StatusPanic-6]
+	_ = x[StatusStopped-3]
+	_ = x[StatusError-4]
+	_ = x[StatusPanic-5]
 }
 
-const _Status_name = "IdleInitializingRunningTransientErrorStoppedErrorPanic"
+const _Status_name = "IdleInitializingRunningStoppedErrorPanic"
 
-var _Status_index = [...]uint8{0, 4, 16, 23, 37, 44, 49, 54}
+var _Status_index = [...]uint8{0, 4, 16, 23, 30, 35, 40}
 
 func (i Status) String() string {
 	if i >= Status(len(_Status_index)-1) {

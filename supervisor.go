@@ -92,42 +92,6 @@ func (s *Supervisor) Start(ctx context.Context) error {
 	}
 }
 
-type contextKey struct{}
-
-type contextValue struct {
-	supervisedService *supervisedService
-	clock             clock.Clock
-	statusUpdateChan  chan StatusUpdate
-}
-
-// ReportTransientError is called by a service managed by a supervisor to flag that the functionality is degraded.
-//
-// Calling this function with nil as the error resolves a previously reported error.
-func ReportTransientError(ctx context.Context, err error) error {
-	valueOrNil := ctx.Value(contextKey{})
-	if valueOrNil == nil {
-		return xerrors.New("non-supervisor context")
-	}
-	value := valueOrNil.(contextValue)
-	status := StatusRunning
-	if err != nil {
-		status = StatusTransientError
-	}
-	update := StatusUpdate{
-		ServiceID:   value.supervisedService.id,
-		ServiceName: value.supervisedService.name,
-		Time:        value.clock.Now(),
-		Status:      status,
-		Err:         err,
-	}
-	select {
-	case value.statusUpdateChan <- update:
-		return nil
-	case <-ctx.Done():
-		return ctx.Err()
-	}
-}
-
 func (s *Supervisor) handleStatusUpdate(update StatusUpdate) {
 	s.cfg.Logger.Debug("Status update", zap.Object("update", update))
 	s.latestStatusUpdates[update.ServiceID] = update
@@ -159,11 +123,6 @@ func (s *Supervisor) start(ctx context.Context, ss *supervisedService) {
 				}
 			}
 		}()
-		ctx = context.WithValue(ctx, contextKey{}, contextValue{
-			supervisedService: ss,
-			clock:             s.cfg.Clock,
-			statusUpdateChan:  s.statusUpdateChan,
-		})
 		if initializer, ok := ss.service.(Initializer); ok {
 			s.statusUpdateChan <- StatusUpdate{
 				ServiceID:   ss.id,

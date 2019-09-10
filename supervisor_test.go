@@ -125,30 +125,6 @@ func TestSupervisor_RestartOnPanic(t *testing.T) {
 	require.Equal(t, StatusPanic, (<-statusUpdateChan).Status)
 }
 
-func TestSupervisor_ReportTransientError(t *testing.T) {
-	cfg := &Config{}
-	statusUpdateChan := make(chan StatusUpdate, 4)
-	cfg.StatusUpdateListeners = append(cfg.StatusUpdateListeners, func(statusUpdates []StatusUpdate) {
-		require.Len(t, statusUpdates, 1)
-		require.Equal(t, "service1", statusUpdates[0].ServiceName)
-		statusUpdateChan <- statusUpdates[0]
-	})
-	transientError := xerrors.New("boom")
-	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
-		require.NoError(t, ReportTransientError(ctx, transientError))
-		require.NoError(t, ReportTransientError(ctx, nil))
-		<-ctx.Done()
-		return nil
-	}))
-	_, done := newTestFixture(t, cfg)
-	require.Equal(t, StatusIdle, (<-statusUpdateChan).Status)
-	require.Equal(t, StatusRunning, (<-statusUpdateChan).Status)
-	require.Equal(t, StatusTransientError, (<-statusUpdateChan).Status)
-	require.Equal(t, StatusRunning, (<-statusUpdateChan).Status)
-	done()
-	require.Equal(t, StatusStopped, (<-statusUpdateChan).Status)
-}
-
 func TestSupervisor_MultipleServices(t *testing.T) {
 	cfg := &Config{}
 	const numServices = 10
