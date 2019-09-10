@@ -27,36 +27,6 @@ func TestSupervisor_SingleService(t *testing.T) {
 	defer done()
 }
 
-func TestSupervisor_InitializerService(t *testing.T) {
-	cfg := &Config{}
-	initializeRendezvous := make(chan struct{})
-	startRendezvous := make(chan struct{})
-	cfg.Services = append(cfg.Services, NewInitializerService(
-		"service1",
-		func(ctx context.Context) error {
-			close(initializeRendezvous)
-			return nil
-		},
-		func(ctx context.Context) error {
-			close(startRendezvous)
-			<-ctx.Done()
-			return nil
-		},
-	))
-	_, done := newTestFixture(t, cfg)
-	defer done()
-	select {
-	case <-initializeRendezvous:
-	case <-time.After(time.Second):
-		t.Fatal("timed out waiting for service to initialize")
-	}
-	select {
-	case <-startRendezvous:
-	case <-time.After(time.Second):
-		t.Fatal("timed out waiting for service to start")
-	}
-}
-
 func TestSupervisor_RestartOnError(t *testing.T) {
 	cfg := &Config{}
 	rendezvousChan := make(chan struct{})

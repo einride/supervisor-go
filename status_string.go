@@ -9,16 +9,15 @@ func _() {
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
 	_ = x[StatusIdle-0]
-	_ = x[StatusInitializing-1]
-	_ = x[StatusRunning-2]
-	_ = x[StatusStopped-3]
-	_ = x[StatusError-4]
-	_ = x[StatusPanic-5]
+	_ = x[StatusRunning-1]
+	_ = x[StatusStopped-2]
+	_ = x[StatusError-3]
+	_ = x[StatusPanic-4]
 }
 
-const _Status_name = "IdleInitializingRunningStoppedErrorPanic"
+const _Status_name = "IdleRunningStoppedErrorPanic"
 
-var _Status_index = [...]uint8{0, 4, 16, 23, 30, 35, 40}
+var _Status_index = [...]uint8{0, 4, 11, 18, 23, 28}
 
 func (i Status) String() string {
 	if i >= Status(len(_Status_index)-1) {
