@@ -32,6 +32,6 @@ func (f *fnInitializerService) Initialize(ctx context.Context) error {
 }
 
 // Start the service.
-func (f *fnInitializerService) Start(ctx context.Context) error {
+func (f *fnInitializerService) Run(ctx context.Context) error {
 	return f.startFn(ctx)
 }

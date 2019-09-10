@@ -4,7 +4,7 @@ import "context"
 
 // Service that can be managed by a supervisor.
 type Service interface {
-	Start(context.Context) error
+	Run(context.Context) error
 }
 
 // NewService creates a new service from a function.
@@ -22,7 +22,7 @@ func (f fnService) String() string {
 	return f.name
 }
 
-// Start the service.
-func (f fnService) Start(ctx context.Context) error {
+// Run the service.
+func (f fnService) Run(ctx context.Context) error {
 	return f.fn(ctx)
 }
