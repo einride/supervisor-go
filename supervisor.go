@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"path"
 	"reflect"
+	"runtime/debug"
 	"time"
 
 	"github.com/einride/clock-go/pkg/clock"
@@ -146,7 +147,8 @@ func (s *Supervisor) start(ctx context.Context, ss *supervisedService) {
 			if r := recover(); r != nil {
 				var err error
 				if errPanic, ok := r.(error); ok {
-					err = xerrors.Errorf("panic: %w", errPanic)
+					stackTrace := string(debug.Stack())
+					err = xerrors.Errorf("panic: %w: %w", errPanic, stackTrace)
 				} else {
 					err = xerrors.Errorf("panic: %v", r)
 				}
