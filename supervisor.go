@@ -72,9 +72,9 @@ func (s *Supervisor) Start(ctx context.Context) error {
 			for id, update := range s.latestStatusUpdates {
 				if !update.Status.IsAlive() {
 					s.cfg.Logger.Info(
-						"Restarting service",
-						zap.String("serviceName", update.ServiceName),
-						zap.Int("serviceID", update.ServiceID),
+						"restarting",
+						zap.String("name", update.ServiceName),
+						zap.Int("id", update.ServiceID),
 					)
 					s.start(ctx, s.supervisedServices[id])
 					s.notifyListeners()
