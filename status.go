@@ -12,8 +12,6 @@ const (
 	StatusInitializing
 	// StatusRunning is when a service is running and everything is a-OK.
 	StatusRunning
-	// StatusTransientError is when a service has reported a transient error.
-	StatusTransientError
 	// StatusStopped is when a service has stopped without without an error.
 	StatusStopped
 	// StatusError is when a service has stopped with an error.
