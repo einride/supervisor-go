@@ -8,8 +8,6 @@ type Status uint8
 const (
 	// StatusIdle is when a service is waiting to be scheduled by the OS scheduler.
 	StatusIdle Status = iota
-	// StatusInitializing is when a service is performing an optional initialization step.
-	StatusInitializing
 	// StatusRunning is when a service is running and everything is a-OK.
 	StatusRunning
 	// StatusStopped is when a service has stopped without without an error.

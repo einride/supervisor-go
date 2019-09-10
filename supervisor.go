@@ -123,24 +123,6 @@ func (s *Supervisor) start(ctx context.Context, ss *supervisedService) {
 				}
 			}
 		}()
-		if initializer, ok := ss.service.(Initializer); ok {
-			s.statusUpdateChan <- StatusUpdate{
-				ServiceID:   ss.id,
-				ServiceName: ss.name,
-				Time:        s.cfg.Clock.Now(),
-				Status:      StatusInitializing,
-			}
-			if err := initializer.Initialize(ctx); err != nil {
-				s.statusUpdateChan <- StatusUpdate{
-					ServiceID:   ss.id,
-					ServiceName: ss.name,
-					Time:        s.cfg.Clock.Now(),
-					Status:      StatusError,
-					Err:         err,
-				}
-				return // fast-fail and wait to be restarted
-			}
-		}
 		s.statusUpdateChan <- StatusUpdate{
 			ServiceID:   ss.id,
 			ServiceName: ss.name,
