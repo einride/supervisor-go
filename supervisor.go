@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"path"
 	"reflect"
+	"runtime/debug"
 	"time"
 
 	"github.com/einride/clock-go/pkg/clock"
@@ -111,18 +112,12 @@ func (s *Supervisor) start(ctx context.Context, ss *supervisedService) {
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				var err error
-				if errPanic, ok := r.(error); ok {
-					err = xerrors.Errorf("panic: %w", errPanic)
-				} else {
-					err = xerrors.Errorf("panic: %v", r)
-				}
 				s.statusUpdateChan <- StatusUpdate{
 					ServiceID:   ss.id,
 					ServiceName: ss.name,
 					Time:        s.cfg.Clock.Now(),
 					Status:      StatusPanic,
-					Err:         err,
+					Err:         xerrors.Errorf("%v: %s", r, string(debug.Stack())),
 				}
 			}
 		}()

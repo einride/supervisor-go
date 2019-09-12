@@ -77,7 +77,7 @@ func TestSupervisor_RestartOnPanic(t *testing.T) {
 	rendezvousChan := make(chan struct{})
 	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
 		rendezvousChan <- struct{}{}
-		panic(xerrors.New("boom"))
+		panic("boom")
 	}))
 	statusUpdateChan := make(chan StatusUpdate, 6)
 	cfg.StatusUpdateListeners = append(cfg.StatusUpdateListeners, func(statusUpdates []StatusUpdate) {
