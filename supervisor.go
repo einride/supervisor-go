@@ -40,18 +40,21 @@ type Supervisor struct {
 // New creates a new supervisor from a config.
 func New(cfg *Config) *Supervisor {
 	s := &Supervisor{
-		cfg:                 cfg,
-		statusUpdateChan:    make(chan StatusUpdate),
-		supervisedServices:  make([]*supervisedService, len(cfg.Services)),
-		latestStatusUpdates: make([]StatusUpdate, len(cfg.Services)),
+		cfg:              cfg,
+		statusUpdateChan: make(chan StatusUpdate),
 	}
-	for id, service := range cfg.Services {
-		s.supervisedServices[id] = &supervisedService{
-			service: service,
-			id:      id,
-			name:    serviceName(service),
+	var id int
+	for _, service := range cfg.Services {
+		if service != nil {
+			s.supervisedServices = append(s.supervisedServices, &supervisedService{
+				service: service,
+				id:      id,
+				name:    serviceName(service),
+			})
+			id++
 		}
 	}
+	s.latestStatusUpdates = make([]StatusUpdate, len(s.supervisedServices))
 	return s
 }
 

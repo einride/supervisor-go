@@ -27,6 +27,17 @@ func TestSupervisor_SingleService(t *testing.T) {
 	defer done()
 }
 
+func TestSupervisor_IgnoreNilService(t *testing.T) {
+	cfg := &Config{}
+	cfg.Services = append(cfg.Services, nil)
+	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
+		<-ctx.Done()
+		return nil
+	}))
+	_, done := newTestFixture(t, cfg)
+	defer done()
+}
+
 func TestSupervisor_RestartOnError(t *testing.T) {
 	cfg := &Config{}
 	rendezvousChan := make(chan struct{})
