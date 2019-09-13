@@ -46,7 +46,7 @@ func New(cfg *Config) *Supervisor {
 	}
 	var id int
 	for _, service := range cfg.Services {
-		if service != nil {
+		if service != nil && !reflect.ValueOf(service).IsNil() {
 			s.supervisedServices = append(s.supervisedServices, &supervisedService{
 				service: service,
 				id:      id,
