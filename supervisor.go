@@ -89,6 +89,11 @@ func (s *Supervisor) Start(ctx context.Context) error {
 		case <-ctxDone:
 			restartTicker.Stop()
 			for isAnyAlive(s.latestStatusUpdates) {
+				for _, u := range s.latestStatusUpdates {
+					if u.Status.IsAlive() {
+						s.cfg.Logger.Debug("still alive", zap.Any("update", u))
+					}
+				}
 				s.handleStatusUpdate(<-s.statusUpdateChan) // TODO: add a timeout
 			}
 			return nil // TODO: error if any service failed
