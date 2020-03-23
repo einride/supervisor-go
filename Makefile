@@ -1,6 +1,7 @@
 # all: all tasks required for a complete build
 .PHONY: all
-all: circleci-config-validate \
+all: yaml-format \
+	markdown-lint \
 	go-generate \
 	go-lint \
 	go-review \
@@ -23,10 +24,15 @@ include build/rules.mk
 build/rules.mk: build
 	@# included in submodule: build
 
-# circleci-config-validate: validate CircleCI config
-.PHONY: circleci-config-validate
-circleci-validate-config: $(CIRCLECI)
-	$(CIRCLECI) config validate
+# yaml-format: formats all yaml files with prettier
+.PHONY: yaml-format
+yaml-format: $(PRETTIER)
+	$(PRETTIER) --check ./**/*.y*ml --check *.y*ml --parser yaml --write
+
+# markdown-lint: lint Markdown files
+.PHONY: markdown-lint
+markdown-lint: $(PRETTIER)
+	$(PRETTIER) --check **/*.md --parser markdown
 
 # go-mod-tidy: make sure go module is neat and tidy
 .PHONY: go-mod-tidy
