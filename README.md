@@ -1,4 +1,5 @@
 # supervisor-go
+
 A service that manages service lifetimes.
 
 A supervisor is essentially a more capable errgroup. It monitors a set
@@ -8,7 +9,7 @@ status changes to listeners via a callback.
 
 ## FAQ
 
-- Where did the `pkg/statepublisher` package go?
+- Q: Where did the `pkg/statepublisher` package go?
+  A: It has been promoted to its own repository at
 
-	It has been promoted to its own repository at
-https://github.com/einride/servicestatepublisher-go
+  https://github.com/einride/servicestatepublisher-go
