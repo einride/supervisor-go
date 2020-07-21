@@ -2,6 +2,7 @@ package supervisor
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -9,10 +10,10 @@ import (
 	"github.com/einride/clock-go/pkg/mockclock"
 	"github.com/einride/supervisor-go/internal/gomockextra"
 	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
-	"golang.org/x/xerrors"
+	"gotest.tools/v3/assert"
+	is "gotest.tools/v3/assert/cmp"
 )
 
 const mockNowNanos = 1234
@@ -43,33 +44,33 @@ func TestSupervisor_RestartOnError(t *testing.T) {
 	rendezvousChan := make(chan struct{})
 	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
 		rendezvousChan <- struct{}{}
-		return xerrors.New("boom")
+		return errors.New("boom")
 	}))
 	statusUpdateChan := make(chan StatusUpdate, 6)
 	cfg.StatusUpdateListeners = append(cfg.StatusUpdateListeners, func(statusUpdates []StatusUpdate) {
-		require.Len(t, statusUpdates, 1)
-		require.Equal(t, "service1", statusUpdates[0].ServiceName)
+		assert.Assert(t, is.Len(statusUpdates, 1))
+		assert.Equal(t, "service1", statusUpdates[0].ServiceName)
 		statusUpdateChan <- statusUpdates[0]
 	})
 	f, done := newTestFixture(t, cfg)
-	require.Equal(t, StatusIdle, (<-statusUpdateChan).Status)
-	require.Equal(t, StatusRunning, (<-statusUpdateChan).Status)
+	assert.Equal(t, StatusIdle, (<-statusUpdateChan).Status)
+	assert.Equal(t, StatusRunning, (<-statusUpdateChan).Status)
 	select {
 	case <-rendezvousChan:
 	case <-time.After(time.Second):
 		t.Fatal("timed out waiting for first run")
 	}
-	require.Equal(t, StatusError, (<-statusUpdateChan).Status)
+	assert.Equal(t, StatusError, (<-statusUpdateChan).Status)
 	f.restartTickChan <- time.Unix(0, 0)
-	require.Equal(t, StatusIdle, (<-statusUpdateChan).Status)
-	require.Equal(t, StatusRunning, (<-statusUpdateChan).Status)
+	assert.Equal(t, StatusIdle, (<-statusUpdateChan).Status)
+	assert.Equal(t, StatusRunning, (<-statusUpdateChan).Status)
 	select {
 	case <-rendezvousChan:
 	case <-time.After(time.Second):
 		t.Fatal("timed out waiting for second run")
 	}
 	done()
-	require.Equal(t, StatusError, (<-statusUpdateChan).Status)
+	assert.Equal(t, StatusError, (<-statusUpdateChan).Status)
 }
 
 func TestSupervisor_RestartOnPanic(t *testing.T) {
@@ -81,29 +82,29 @@ func TestSupervisor_RestartOnPanic(t *testing.T) {
 	}))
 	statusUpdateChan := make(chan StatusUpdate, 6)
 	cfg.StatusUpdateListeners = append(cfg.StatusUpdateListeners, func(statusUpdates []StatusUpdate) {
-		require.Len(t, statusUpdates, 1)
-		require.Equal(t, "service1", statusUpdates[0].ServiceName)
+		assert.Assert(t, is.Len(statusUpdates, 1))
+		assert.Equal(t, "service1", statusUpdates[0].ServiceName)
 		statusUpdateChan <- statusUpdates[0]
 	})
 	f, done := newTestFixture(t, cfg)
-	require.Equal(t, StatusIdle, (<-statusUpdateChan).Status)
-	require.Equal(t, StatusRunning, (<-statusUpdateChan).Status)
+	assert.Equal(t, StatusIdle, (<-statusUpdateChan).Status)
+	assert.Equal(t, StatusRunning, (<-statusUpdateChan).Status)
 	select {
 	case <-rendezvousChan:
 	case <-time.After(time.Second):
 		t.Fatal("timed out waiting for first run")
 	}
-	require.Equal(t, StatusPanic, (<-statusUpdateChan).Status)
+	assert.Equal(t, StatusPanic, (<-statusUpdateChan).Status)
 	f.restartTickChan <- time.Unix(0, 0)
-	require.Equal(t, StatusIdle, (<-statusUpdateChan).Status)
-	require.Equal(t, StatusRunning, (<-statusUpdateChan).Status)
+	assert.Equal(t, StatusIdle, (<-statusUpdateChan).Status)
+	assert.Equal(t, StatusRunning, (<-statusUpdateChan).Status)
 	select {
 	case <-rendezvousChan:
 	case <-time.After(time.Second):
 		t.Fatal("timed out waiting for second run")
 	}
 	done()
-	require.Equal(t, StatusPanic, (<-statusUpdateChan).Status)
+	assert.Equal(t, StatusPanic, (<-statusUpdateChan).Status)
 }
 
 func TestSupervisor_MultipleServices(t *testing.T) {
@@ -157,7 +158,7 @@ func newTestFixture(t *testing.T, cfg *Config) (*testFixture, func()) {
 	})
 	done := func() {
 		cancel()
-		require.NoError(t, g.Wait())
+		assert.NilError(t, g.Wait())
 		mockCtrl.Finish()
 	}
 	return f, done

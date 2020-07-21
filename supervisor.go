@@ -11,7 +11,6 @@ import (
 
 	"github.com/einride/clock-go/pkg/clock"
 	"go.uber.org/zap"
-	"golang.org/x/xerrors"
 )
 
 // Config contains the full set of dependencies for a supervisor.
@@ -123,7 +122,7 @@ func (s *Supervisor) start(ctx context.Context, ss *supervisedService) {
 					ServiceName: ss.name,
 					Time:        s.cfg.Clock.Now(),
 					Status:      StatusPanic,
-					Err:         xerrors.Errorf("%v: %s", r, string(debug.Stack())),
+					Err:         fmt.Errorf("%v: %s", r, string(debug.Stack())),
 				}
 			}
 		}()
