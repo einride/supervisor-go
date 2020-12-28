@@ -1,22 +1,39 @@
 package supervisor
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"testing"
 	"time"
 
+	"github.com/einride/clock-go/pkg/clock"
 	"github.com/einride/clock-go/pkg/mockclock"
 	"github.com/einride/supervisor-go/internal/gomockextra"
 	"github.com/golang/mock/gomock"
-	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"gotest.tools/v3/assert"
 	is "gotest.tools/v3/assert/cmp"
 )
 
 const mockNowNanos = 1234
+
+func TestSupervisor_New(t *testing.T) {
+	// given
+	var bs bytes.Buffer
+	cfg := Config{
+		RestartInterval: 100 * time.Millisecond,
+		Clock:           clock.System(),
+	}
+	supervisor := New(&cfg)
+	// when the supervisor is started
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	assert.NilError(t, supervisor.Start(ctx))
+	cancel()
+	// then nothing is logged since no services are added
+	assert.Equal(t, "", bs.String())
+}
 
 func TestSupervisor_SingleService(t *testing.T) {
 	cfg := &Config{}
@@ -148,7 +165,6 @@ func newTestFixture(t *testing.T, cfg *Config) (*testFixture, func()) {
 	f.clock.EXPECT().Now().Return(time.Unix(0, mockNowNanos)).AnyTimes()
 	f.restartTicker.EXPECT().C().Return(f.restartTickChan)
 	f.restartTicker.EXPECT().Stop()
-	cfg.Logger = zap.NewExample()
 	cfg.Clock = f.clock
 	s := New(cfg)
 	var g errgroup.Group
