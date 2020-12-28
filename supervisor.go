@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/einride/clock-go/pkg/clock"
-	"go.uber.org/zap"
 )
 
 // Config contains the full set of dependencies for a supervisor.
@@ -19,7 +18,7 @@ type Config struct {
 	StatusUpdateListeners []func([]StatusUpdate)
 	RestartInterval       time.Duration
 	Clock                 clock.Clock
-	Logger                *zap.Logger
+	Logger                Logger
 }
 
 type supervisedService struct {
@@ -42,6 +41,9 @@ func New(cfg *Config) *Supervisor {
 	s := &Supervisor{
 		cfg:              cfg,
 		statusUpdateChan: make(chan StatusUpdate),
+	}
+	if cfg.Logger == nil {
+		s.cfg.Logger = &nopLogger{}
 	}
 	var id int
 	for _, service := range cfg.Services {
@@ -74,11 +76,10 @@ func (s *Supervisor) Start(ctx context.Context) error {
 		case <-restartTickChan:
 			for id, update := range s.latestStatusUpdates {
 				if !update.Status.IsAlive() {
-					s.cfg.Logger.Warn(
-						"restarting",
-						zap.String("name", update.ServiceName),
-						zap.Int("id", update.ServiceID),
-						zap.Error(update.Err),
+					s.cfg.Logger.Warningf(
+						"restarting service %s: %v",
+						update.ServiceName,
+						update,
 					)
 					s.start(ctx, s.supervisedServices[id])
 					s.notifyListeners()
@@ -91,7 +92,7 @@ func (s *Supervisor) Start(ctx context.Context) error {
 			for isAnyAlive(s.latestStatusUpdates) {
 				for _, u := range s.latestStatusUpdates {
 					if u.Status.IsAlive() {
-						s.cfg.Logger.Debug("still alive", zap.Any("update", u))
+						s.cfg.Logger.Debugf("service alive: %v", u)
 					}
 				}
 				s.handleStatusUpdate(<-s.statusUpdateChan) // TODO: add a timeout
@@ -102,7 +103,7 @@ func (s *Supervisor) Start(ctx context.Context) error {
 }
 
 func (s *Supervisor) handleStatusUpdate(update StatusUpdate) {
-	s.cfg.Logger.Debug("Status update", zap.Object("update", update))
+	s.cfg.Logger.Debugf("received update: %v", update)
 	s.latestStatusUpdates[update.ServiceID] = update
 	s.notifyListeners()
 }

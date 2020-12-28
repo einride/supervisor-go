@@ -1,11 +1,11 @@
 package supervisor
 
 import (
+	"fmt"
 	"time"
-
-	"go.uber.org/zap/zapcore"
 )
 
+// StatusUpdate represents an update to a supervised service.
 type StatusUpdate struct {
 	ServiceID   int
 	ServiceName string
@@ -14,13 +14,13 @@ type StatusUpdate struct {
 	Err         error
 }
 
-func (su StatusUpdate) MarshalLogObject(enc zapcore.ObjectEncoder) error {
-	enc.AddInt("serviceID", su.ServiceID)
-	enc.AddString("serviceName", su.ServiceName)
-	enc.AddTime("time", su.Time)
-	enc.AddString("status", su.Status.String())
-	if su.Err != nil {
-		enc.AddString("err", su.Err.Error())
-	}
-	return nil
+func (u StatusUpdate) String() string {
+	return fmt.Sprintf(
+		"{ServiceID: %v, ServiceName: %v, Time: %v, Status: %v, Err: %v}",
+		u.ServiceID,
+		u.ServiceName,
+		u.Time,
+		u.Status,
+		u.Err,
+	)
 }
