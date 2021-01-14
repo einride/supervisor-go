@@ -8,23 +8,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/einride/clock-go/pkg/clock"
-	"github.com/einride/clock-go/pkg/mockclock"
-	"github.com/einride/supervisor-go/internal/gomockextra"
-	"github.com/golang/mock/gomock"
 	"golang.org/x/sync/errgroup"
 	"gotest.tools/v3/assert"
 	is "gotest.tools/v3/assert/cmp"
 )
-
-const mockNowNanos = 1234
 
 func TestSupervisor_New(t *testing.T) {
 	// given
 	var bs bytes.Buffer
 	cfg := Config{
 		RestartInterval: 100 * time.Millisecond,
-		Clock:           clock.System(),
+		Clock:           NewSystemClock(),
 	}
 	supervisor := New(&cfg)
 	// when the supervisor is started
@@ -146,25 +140,46 @@ func TestSupervisor_MultipleServices(t *testing.T) {
 	}
 }
 
+type mockClock struct {
+	now      time.Time
+	tickChan chan time.Time
+}
+
+var _ Clock = &mockClock{}
+
+func (m *mockClock) Now() time.Time {
+	return m.now
+}
+
+func (m *mockClock) NewTicker(time.Duration) Ticker {
+	return &mockTicker{timeChan: m.tickChan}
+}
+
+type mockTicker struct {
+	timeChan chan time.Time
+}
+
+var _ Ticker = &mockTicker{}
+
+func (m *mockTicker) C() <-chan time.Time {
+	return m.timeChan
+}
+
+func (m *mockTicker) Stop() {}
+
 type testFixture struct {
-	clock           *mockclock.MockClock
-	restartTicker   *mockclock.MockTicker
+	clock           *mockClock
 	restartTickChan chan time.Time
 }
 
 func newTestFixture(t *testing.T, cfg *Config) (*testFixture, func()) {
 	t.Helper()
-	mockCtrl := gomock.NewController(gomockextra.GoroutineReporter(t))
+	restartTickChan := make(chan time.Time)
 	f := &testFixture{
-		clock:           mockclock.NewMockClock(mockCtrl),
-		restartTicker:   mockclock.NewMockTicker(mockCtrl),
-		restartTickChan: make(chan time.Time),
+		restartTickChan: restartTickChan,
+		clock:           &mockClock{tickChan: restartTickChan},
 	}
 	cfg.RestartInterval = time.Second
-	f.clock.EXPECT().NewTicker(cfg.RestartInterval).Return(f.restartTicker)
-	f.clock.EXPECT().Now().Return(time.Unix(0, mockNowNanos)).AnyTimes()
-	f.restartTicker.EXPECT().C().Return(f.restartTickChan)
-	f.restartTicker.EXPECT().Stop()
 	cfg.Clock = f.clock
 	s := New(cfg)
 	var g errgroup.Group
@@ -175,7 +190,6 @@ func newTestFixture(t *testing.T, cfg *Config) (*testFixture, func()) {
 	done := func() {
 		cancel()
 		assert.NilError(t, g.Wait())
-		mockCtrl.Finish()
 	}
 	return f, done
 }

@@ -8,8 +8,6 @@ import (
 	"reflect"
 	"runtime/debug"
 	"time"
-
-	"github.com/einride/clock-go/pkg/clock"
 )
 
 // Config contains the full set of dependencies for a supervisor.
@@ -17,7 +15,7 @@ type Config struct {
 	Services              []Service
 	StatusUpdateListeners []func([]StatusUpdate)
 	RestartInterval       time.Duration
-	Clock                 clock.Clock
+	Clock                 Clock
 	Logger                Logger
 }
 
@@ -41,6 +39,9 @@ func New(cfg *Config) *Supervisor {
 	s := &Supervisor{
 		cfg:              cfg,
 		statusUpdateChan: make(chan StatusUpdate),
+	}
+	if cfg.Clock == nil {
+		s.cfg.Clock = NewSystemClock()
 	}
 	if cfg.Logger == nil {
 		s.cfg.Logger = &nopLogger{}
