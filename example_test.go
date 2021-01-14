@@ -1,21 +1,11 @@
-# supervisor-go
+package supervisor_test
 
-A service that manages service lifetimes.
-
-A supervisor is essentially a more capable errgroup. It monitors a set
-of running services, and restarts them if they fail.
-The supervisor keeps track of the status of each service and reports any
-status changes to listeners via a callback.
-
-## Examples
-
-### Supervising a service
-
-```go
 import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"os"
 	"time"
 
 	"github.com/einride/supervisor-go"
@@ -57,11 +47,36 @@ func ExampleSupervisor() {
 	// example: Running
 	// example: Error
 }
-```
 
-## FAQ
+func ExampleNewStdLogger() {
+	// Create a supervisor.StdLogger
+	logger := supervisor.NewStdLogger(os.Stdout)
 
-- Q: Where did the `pkg/statepublisher` package go?
-  A: It has been promoted to its own repository at
+	// Log a debug message
+	logger.Debugf("this message supports %s", "Printf formatting")
 
-  https://github.com/einride/servicestatepublisher-go
+	// Log a warning message
+	logger.Warningf("this is a warning")
+	// Output:
+	// DEBUG: this message supports Printf formatting
+	// WARN: this is a warning
+}
+
+func ExampleStdLogger() {
+	// Create a supervisor.StdLogger that only logs on warning
+	// level to os.Stdout and sets log.Flags to the underlying
+	// log.Logger.
+	logger := supervisor.DefaultLoggerOpts().
+		WithWarningOutput(os.Stdout).
+		WithFlags(log.Lshortfile).
+		WithLogLevel(supervisor.LogLevelWarning).
+		New()
+
+	// Log a debug message
+	logger.Debugf("this message supports %s", "Printf formatting")
+
+	// Log a warning message
+	logger.Warningf("this is a warning")
+	// Output:
+	// WARN: logger.go:59: this is a warning
+}
