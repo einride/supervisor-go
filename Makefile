@@ -15,6 +15,7 @@ include tools/golangci-lint/rules.mk
 include tools/prettier/rules.mk
 include tools/goreview/rules.mk
 include tools/xtools/rules.mk
+include tools/semantic-release/rules.mk
 
 # yaml-format: formats all yaml files with prettier
 .PHONY: yaml-format
