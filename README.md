@@ -58,10 +58,3 @@ func ExampleSupervisor() {
 	// example: Error
 }
 ```
-
-## FAQ
-
-- Q: Where did the `pkg/statepublisher` package go?
-  A: It has been promoted to its own repository at
-
-  https://github.com/einride/servicestatepublisher-go
