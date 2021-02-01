@@ -9,18 +9,11 @@ status changes to listeners via a callback.
 
 ## Examples
 
-### Supervising a service
+### Supervising multiple services
+
+Just as with errgroups, a supervisor can manage multiple services.
 
 ```go
-import (
-	"context"
-	"errors"
-	"fmt"
-	"time"
-
-	"github.com/einride/supervisor-go"
-)
-
 func ExampleSupervisor() {
 	// Restart stopped services every 10ms.
 	cfg := supervisor.Config{
@@ -28,33 +21,89 @@ func ExampleSupervisor() {
 		// No specified clock returns system clock
 		// No specified logger returns a nop-logger
 	}
-	// Register a listener that prints all updates
-	listener := func(updates []supervisor.StatusUpdate) {
-		for _, update := range updates {
-			fmt.Printf("%v: %v\n", update.ServiceName, update.Status)
+	// Create a context which can be canceled.
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	// Create pingpong table
+	table := make(chan int)
+	roundsToPlay := 2
+	// Create player services.
+	pingService := supervisor.NewService("ping", func(ctx context.Context) error {
+		i := roundsToPlay
+		for {
+			select {
+			case <-ctx.Done():
+				return fmt.Errorf("timeout")
+			case table <- i:
+				fmt.Println("ping")
+				i = <-table
+				if i == 0 {
+					close(table)
+					cancel()
+					return nil
+				}
+			}
 		}
-	}
-	cfg.StatusUpdateListeners = append(cfg.StatusUpdateListeners, listener)
-	// Service that sleeps and then crashes.
-	svc := supervisor.NewService("example", func(ctx context.Context) error {
-		return errors.New("timeout")
+	})
+	pongService := supervisor.NewService("pong", func(ctx context.Context) error {
+		for {
+			select {
+			case <-ctx.Done():
+				return fmt.Errorf("timeout")
+			case i := <-table:
+				if i == 0 {
+					return nil
+				}
+				table <- i - 1
+				fmt.Println("pong")
+			}
+		}
 	})
 	// Add service to the supervised services.
-	cfg.Services = append(cfg.Services, svc)
+	cfg.Services = append(cfg.Services, pingService, pongService)
 	// Create the supervisor from the config.
 	s := supervisor.New(&cfg)
-	// Create a context which will timeout immediately, the supervisor will still
-	// wait for its services to exit before exiting.
-	ctx, cancel := context.WithTimeout(context.Background(), 0*time.Millisecond)
 	// Start the supervisor (blocking call).
 	err := s.Start(ctx)
 	if err != nil {
 		// handle error
+		panic(err)
 	}
 	defer cancel()
 	// Output:
-	// example: Idle
-	// example: Running
-	// example: Error
+	// ping
+	// pong
+	// ping
+	// pong
+}
+```
+
+### Restarting crashed services
+
+The main difference from errgroups is that a supervisor will restart a crashed service.
+
+```go
+func ExampleNew() {
+	// Restart stopped services every 10ms.
+	cfg := supervisor.Config{
+		RestartInterval: 10 * time.Millisecond,
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	starts := 0
+	svc := supervisor.NewService("example", func(ctx context.Context) error {
+		starts++
+		if starts > 3 {
+			cancel()
+			return nil
+		}
+		return fmt.Errorf("oops")
+	})
+	cfg.Services = append(cfg.Services, svc)
+	s := supervisor.New(&cfg)
+	if err := s.Start(ctx); err != nil {
+        // no error currently returned
+	}
+	fmt.Println("service restarted", starts, "times")
+	// Output:
+	// service restarted 3 times
 }
 ```
