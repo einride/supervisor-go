@@ -1,8 +1,8 @@
 # all: all tasks required for a complete build
 .PHONY: all
 all: \
-	yaml-format \
-	markdown-lint \
+	prettier-yaml \
+	prettier-markdown \
 	go-generate \
 	go-lint \
 	go-review \
@@ -17,15 +17,15 @@ include tools/goreview/rules.mk
 include tools/xtools/rules.mk
 include tools/semantic-release/rules.mk
 
-# yaml-format: formats all yaml files with prettier
-.PHONY: yaml-format
-yaml-format: $(prettier)
+# prettier-yaml: formats all yaml files with prettier
+.PHONY: prettier-yaml
+prettier-yaml: $(prettier)
 	$(prettier) --check ./**/*.y*ml --check *.y*ml --parser yaml --write
 
-# markdown-lint: lint Markdown files
-.PHONY: markdown-lint
-markdown-lint: $(prettier)
-	$(prettier) --check **/*.md --parser markdown
+# prettier-markdown: formats all Markdown files with prettier
+.PHONY: prettier-markdown
+prettier-markdown: $(prettier)
+	$(prettier) --check **/*.md --parser markdown --write
 
 # go-mod-tidy: make sure go module is neat and tidy
 .PHONY: go-mod-tidy
