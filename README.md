@@ -1,4 +1,4 @@
-# supervisor-go
+# go.einride.tech/supervisor
 
 A service that manages service lifetimes.
 

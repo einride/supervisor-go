@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/einride/supervisor-go"
+	"go.einride.tech/supervisor"
 )
 
 func ExampleSupervisor() {

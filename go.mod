@@ -1,4 +1,4 @@
-module github.com/einride/supervisor-go
+module go.einride.tech/supervisor
 
 go 1.13
 
