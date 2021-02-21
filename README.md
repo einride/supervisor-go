@@ -82,7 +82,7 @@ func ExampleSupervisor() {
 The main difference from errgroups is that a supervisor will restart a crashed service.
 
 ```go
-func ExampleNew() {
+func ExampleRestartOnError() {
 	// Restart stopped services every 10ms.
 	cfg := supervisor.Config{
 		RestartInterval: 10 * time.Millisecond,
