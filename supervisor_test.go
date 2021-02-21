@@ -23,7 +23,7 @@ func TestSupervisor_New(t *testing.T) {
 	supervisor := New(&cfg)
 	// when the supervisor is started
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
-	assert.NilError(t, supervisor.Start(ctx))
+	assert.NilError(t, supervisor.Run(ctx))
 	cancel()
 	// then nothing is logged since no services are added
 	assert.Equal(t, "", bs.String())
@@ -185,7 +185,7 @@ func newTestFixture(t *testing.T, cfg *Config) (*testFixture, func()) {
 	var g errgroup.Group
 	ctx, cancel := context.WithCancel(context.Background())
 	g.Go(func() error {
-		return s.Start(ctx)
+		return s.Run(ctx)
 	})
 	done := func() {
 		cancel()

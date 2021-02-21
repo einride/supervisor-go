@@ -58,8 +58,8 @@ func ExampleSupervisor() {
 	cfg.Services = append(cfg.Services, pingService, pongService)
 	// Create the supervisor from the config.
 	s := supervisor.New(&cfg)
-	// Start the supervisor (blocking call).
-	err := s.Start(ctx)
+	// Run the supervisor (blocking call).
+	err := s.Run(ctx)
 	if err != nil {
 		// handle error
 		panic(err)
@@ -92,8 +92,8 @@ func ExampleNew() {
 	cfg.Services = append(cfg.Services, svc)
 	// Create supervisor from config.
 	s := supervisor.New(&cfg)
-	// Start supervisor (blocking).
-	_ = s.Start(ctx) // no error currently reported
+	// Run supervisor (blocking).
+	_ = s.Run(ctx) // no error currently reported
 	fmt.Println("service restarted", starts, "times")
 	// Output:
 	// service restarted 3 times
@@ -128,7 +128,7 @@ func ExampleConfig_StatusUpdateListeners() {
 		}
 	})
 	s := supervisor.New(&cfg)
-	_ = s.Start(ctx) // no error currently reported
+	_ = s.Run(ctx) // no error currently reported
 	fmt.Println("service stopped", stops, "times")
 	// Output:
 	// service stopped 3 times
