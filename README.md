@@ -62,8 +62,8 @@ func ExampleSupervisor() {
 	cfg.Services = append(cfg.Services, pingService, pongService)
 	// Create the supervisor from the config.
 	s := supervisor.New(&cfg)
-	// Start the supervisor (blocking call).
-	err := s.Start(ctx)
+	// Run the supervisor (blocking call).
+	err := s.Run(ctx)
 	if err != nil {
 		// handle error
 		panic(err)
@@ -99,7 +99,7 @@ func ExampleRestartOnError() {
 	})
 	cfg.Services = append(cfg.Services, svc)
 	s := supervisor.New(&cfg)
-	if err := s.Start(ctx); err != nil {
+	if err := s.Run(ctx); err != nil {
         // no error currently returned
 	}
 	fmt.Println("service restarted", starts, "times")

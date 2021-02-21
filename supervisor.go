@@ -60,8 +60,8 @@ func New(cfg *Config) *Supervisor {
 	return s
 }
 
-// Start the supervisor and all its services.
-func (s *Supervisor) Start(ctx context.Context) error {
+// Run the supervisor and all its services.
+func (s *Supervisor) Run(ctx context.Context) error {
 	// start all services
 	for _, ss := range s.supervisedServices {
 		s.start(ctx, ss)
