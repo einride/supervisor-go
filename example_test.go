@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/go-logr/stdr"
 	"go.einride.tech/supervisor"
 )
 
@@ -76,6 +77,7 @@ func ExampleNew() {
 	// Restart stopped services every 10ms.
 	cfg := supervisor.Config{
 		RestartInterval: 10 * time.Millisecond,
+		Logger:          stdr.New(log.New(os.Stderr, "", log.LstdFlags)),
 	}
 	// Create a context that can be canceled inside the service.
 	ctx, cancel := context.WithCancel(context.Background())
@@ -109,6 +111,7 @@ func ExampleConfig_StatusUpdateListeners() {
 				return fmt.Errorf("oops")
 			}),
 		},
+		Logger: stdr.New(log.New(os.Stderr, "", log.LstdFlags)),
 	}
 	// Create a context that can be canceled.
 	ctx, cancel := context.WithCancel(context.Background())
@@ -132,37 +135,4 @@ func ExampleConfig_StatusUpdateListeners() {
 	fmt.Println("service stopped", stops, "times")
 	// Output:
 	// service stopped 3 times
-}
-
-func ExampleNewStdLogger() {
-	// Create a supervisor.StdLogger
-	logger := supervisor.NewStdLogger(os.Stdout)
-
-	// Log a debug message
-	logger.Debugf("this message supports %s", "Printf formatting")
-
-	// Log a warning message
-	logger.Warningf("this is a warning")
-	// Output:
-	// DEBUG: this message supports Printf formatting
-	// WARN: this is a warning
-}
-
-func ExampleStdLogger() {
-	// Create a supervisor.StdLogger that only logs on warning
-	// level to os.Stdout and sets log.Flags to the underlying
-	// log.Logger.
-	logger := supervisor.DefaultLoggerOpts().
-		WithWarningOutput(os.Stdout).
-		WithFlags(log.Lshortfile).
-		WithLogLevel(supervisor.LogLevelWarning).
-		New()
-
-	// Log a debug message
-	logger.Debugf("this message supports %s", "Printf formatting")
-
-	// Log a warning message
-	logger.Warningf("this is a warning")
-	// Output:
-	// WARN: logger.go:59: this is a warning
 }

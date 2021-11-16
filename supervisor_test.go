@@ -5,9 +5,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"os"
 	"testing"
 	"time"
 
+	"github.com/go-logr/stdr"
 	"golang.org/x/sync/errgroup"
 	"gotest.tools/v3/assert"
 	is "gotest.tools/v3/assert/cmp"
@@ -19,6 +22,7 @@ func TestSupervisor_New(t *testing.T) {
 	cfg := Config{
 		RestartInterval: 100 * time.Millisecond,
 		Clock:           NewSystemClock(),
+		Logger:          stdr.New(log.New(os.Stderr, "", log.LstdFlags)),
 	}
 	supervisor := New(&cfg)
 	// when the supervisor is started
@@ -30,7 +34,9 @@ func TestSupervisor_New(t *testing.T) {
 }
 
 func TestSupervisor_SingleService(t *testing.T) {
-	cfg := &Config{}
+	cfg := &Config{
+		Logger: stdr.New(log.New(os.Stderr, "", log.LstdFlags)),
+	}
 	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
 		<-ctx.Done()
 		return nil
@@ -40,7 +46,10 @@ func TestSupervisor_SingleService(t *testing.T) {
 }
 
 func TestSupervisor_IgnoreNilService(t *testing.T) {
-	cfg := &Config{}
+	cfg := &Config{
+
+		Logger: stdr.New(log.New(os.Stderr, "", log.LstdFlags)),
+	}
 	cfg.Services = append(cfg.Services, nil)
 	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
 		<-ctx.Done()
@@ -51,7 +60,9 @@ func TestSupervisor_IgnoreNilService(t *testing.T) {
 }
 
 func TestSupervisor_RestartOnError(t *testing.T) {
-	cfg := &Config{}
+	cfg := &Config{
+		Logger: stdr.New(log.New(os.Stderr, "", log.LstdFlags)),
+	}
 	rendezvousChan := make(chan struct{})
 	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
 		rendezvousChan <- struct{}{}
@@ -85,7 +96,9 @@ func TestSupervisor_RestartOnError(t *testing.T) {
 }
 
 func TestSupervisor_RestartOnPanic(t *testing.T) {
-	cfg := &Config{}
+	cfg := &Config{
+		Logger: stdr.New(log.New(os.Stderr, "", log.LstdFlags)),
+	}
 	rendezvousChan := make(chan struct{})
 	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
 		rendezvousChan <- struct{}{}
@@ -119,7 +132,9 @@ func TestSupervisor_RestartOnPanic(t *testing.T) {
 }
 
 func TestSupervisor_MultipleServices(t *testing.T) {
-	cfg := &Config{}
+	cfg := &Config{
+		Logger: stdr.New(log.New(os.Stderr, "", log.LstdFlags)),
+	}
 	const numServices = 10
 	serviceChan := make(chan struct{})
 	for i := 0; i < numServices; i++ {
