@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-logr/logr"
 	"github.com/go-logr/stdr"
 	"golang.org/x/sync/errgroup"
 	"gotest.tools/v3/assert"
@@ -38,6 +39,22 @@ func TestSupervisor_SingleService(t *testing.T) {
 		Logger: stdr.New(log.New(os.Stderr, "", log.LstdFlags)),
 	}
 	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
+		<-ctx.Done()
+		return nil
+	}))
+	_, done := newTestFixture(t, cfg)
+	defer done()
+}
+
+func TestSupervisor_Logger(t *testing.T) {
+	cfg := &Config{
+		Logger: stdr.New(log.New(os.Stderr, "", log.LstdFlags)),
+	}
+	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
+		logger, err := logr.FromContext(ctx)
+		assert.NilError(t, err)
+		logger.Info("running")
+		defer logger.Info("returning")
 		<-ctx.Done()
 		return nil
 	}))

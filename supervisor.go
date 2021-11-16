@@ -136,7 +136,7 @@ func (s *Supervisor) start(ctx context.Context, ss *supervisedService) {
 			Time:        s.cfg.Clock.Now(),
 			Status:      StatusRunning,
 		}
-		err := ss.service.Run(ctx)
+		err := ss.service.Run(logr.NewContext(ctx, s.cfg.Logger.WithValues("service", ss.name)))
 		status := StatusStopped
 		if err != nil {
 			status = StatusError
