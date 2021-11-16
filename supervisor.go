@@ -7,6 +7,8 @@ import (
 	"reflect"
 	"runtime/debug"
 	"time"
+
+	"github.com/go-logr/logr"
 )
 
 // Config contains the full set of dependencies for a supervisor.
@@ -15,7 +17,7 @@ type Config struct {
 	StatusUpdateListeners []func([]StatusUpdate)
 	RestartInterval       time.Duration
 	Clock                 Clock
-	Logger                Logger
+	Logger                logr.Logger
 }
 
 type supervisedService struct {
@@ -42,9 +44,10 @@ func New(cfg *Config) *Supervisor {
 	if cfg.Clock == nil {
 		s.cfg.Clock = NewSystemClock()
 	}
-	if cfg.Logger == nil {
-		s.cfg.Logger = &nopLogger{}
+	if cfg.Logger.GetSink() == nil {
+		s.cfg.Logger = logr.Discard()
 	}
+	cfg.Logger = cfg.Logger.WithName("supervisor")
 	var id int
 	for _, service := range cfg.Services {
 		if service != nil && !reflect.ValueOf(service).IsNil() {
@@ -76,11 +79,7 @@ func (s *Supervisor) Run(ctx context.Context) error {
 		case <-restartTickChan:
 			for id, update := range s.latestStatusUpdates {
 				if !update.Status.IsAlive() {
-					s.cfg.Logger.Warningf(
-						"restarting service %s: %v",
-						update.ServiceName,
-						update,
-					)
+					s.cfg.Logger.Info("restarting service", "update", update)
 					s.start(ctx, s.supervisedServices[id])
 					s.notifyListeners()
 				}
@@ -92,7 +91,7 @@ func (s *Supervisor) Run(ctx context.Context) error {
 			for isAnyAlive(s.latestStatusUpdates) {
 				for _, u := range s.latestStatusUpdates {
 					if u.Status.IsAlive() {
-						s.cfg.Logger.Debugf("service alive: %v", u)
+						s.cfg.Logger.V(1).Info("service alive", "update", u)
 					}
 				}
 				s.handleStatusUpdate(<-s.statusUpdateChan) // TODO: add a timeout
@@ -103,7 +102,11 @@ func (s *Supervisor) Run(ctx context.Context) error {
 }
 
 func (s *Supervisor) handleStatusUpdate(update StatusUpdate) {
-	s.cfg.Logger.Debugf("received update: %v", update)
+	if update.Err == nil {
+		s.cfg.Logger.V(1).Info("received status", "update", update)
+	} else {
+		s.cfg.Logger.Error(update.Err, "received error status", "update", update)
+	}
 	s.latestStatusUpdates[update.ServiceID] = update
 	s.notifyListeners()
 }
