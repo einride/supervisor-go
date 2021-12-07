@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	"go.einride.tech/clock"
+	"go.einride.tech/clock/systemclock"
 )
 
 // Config contains the full set of dependencies for a supervisor.
@@ -16,7 +18,7 @@ type Config struct {
 	Services              []Service
 	StatusUpdateListeners []func([]StatusUpdate)
 	RestartInterval       time.Duration
-	Clock                 Clock
+	Clock                 clock.Clock
 	Logger                logr.Logger
 }
 
@@ -42,7 +44,7 @@ func New(cfg *Config) *Supervisor {
 		statusUpdateChan: make(chan StatusUpdate),
 	}
 	if cfg.Clock == nil {
-		s.cfg.Clock = NewSystemClock()
+		s.cfg.Clock = systemclock.New()
 	}
 	if cfg.Logger.GetSink() == nil {
 		s.cfg.Logger = logr.Discard()
