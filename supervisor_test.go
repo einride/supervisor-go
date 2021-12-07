@@ -5,13 +5,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
-	"os"
 	"testing"
 	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/go-logr/stdr"
+	testr "github.com/go-logr/logr/testing"
+	"go.einride.tech/clock"
+	"go.einride.tech/clock/systemclock"
 	"golang.org/x/sync/errgroup"
 	"gotest.tools/v3/assert"
 	is "gotest.tools/v3/assert/cmp"
@@ -22,8 +22,8 @@ func TestSupervisor_New(t *testing.T) {
 	var bs bytes.Buffer
 	cfg := Config{
 		RestartInterval: 100 * time.Millisecond,
-		Clock:           NewSystemClock(),
-		Logger:          stdr.New(log.New(os.Stderr, "", log.LstdFlags)),
+		Clock:           systemclock.New(),
+		Logger:          testr.NewTestLogger(t),
 	}
 	supervisor := New(&cfg)
 	// when the supervisor is started
@@ -36,7 +36,7 @@ func TestSupervisor_New(t *testing.T) {
 
 func TestSupervisor_SingleService(t *testing.T) {
 	cfg := &Config{
-		Logger: stdr.New(log.New(os.Stderr, "", log.LstdFlags)),
+		Logger: testr.NewTestLogger(t),
 	}
 	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
 		<-ctx.Done()
@@ -48,7 +48,7 @@ func TestSupervisor_SingleService(t *testing.T) {
 
 func TestSupervisor_Logger(t *testing.T) {
 	cfg := &Config{
-		Logger: stdr.New(log.New(os.Stderr, "", log.LstdFlags)),
+		Logger: testr.NewTestLogger(t),
 	}
 	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
 		logger, err := logr.FromContext(ctx)
@@ -65,7 +65,7 @@ func TestSupervisor_Logger(t *testing.T) {
 func TestSupervisor_IgnoreNilService(t *testing.T) {
 	cfg := &Config{
 
-		Logger: stdr.New(log.New(os.Stderr, "", log.LstdFlags)),
+		Logger: testr.NewTestLogger(t),
 	}
 	cfg.Services = append(cfg.Services, nil)
 	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
@@ -78,7 +78,7 @@ func TestSupervisor_IgnoreNilService(t *testing.T) {
 
 func TestSupervisor_RestartOnError(t *testing.T) {
 	cfg := &Config{
-		Logger: stdr.New(log.New(os.Stderr, "", log.LstdFlags)),
+		Logger: testr.NewTestLogger(t),
 	}
 	rendezvousChan := make(chan struct{})
 	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
@@ -114,7 +114,7 @@ func TestSupervisor_RestartOnError(t *testing.T) {
 
 func TestSupervisor_RestartOnPanic(t *testing.T) {
 	cfg := &Config{
-		Logger: stdr.New(log.New(os.Stderr, "", log.LstdFlags)),
+		Logger: testr.NewTestLogger(t),
 	}
 	rendezvousChan := make(chan struct{})
 	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
@@ -150,7 +150,7 @@ func TestSupervisor_RestartOnPanic(t *testing.T) {
 
 func TestSupervisor_MultipleServices(t *testing.T) {
 	cfg := &Config{
-		Logger: stdr.New(log.New(os.Stderr, "", log.LstdFlags)),
+		Logger: testr.NewTestLogger(t),
 	}
 	const numServices = 10
 	serviceChan := make(chan struct{})
@@ -173,17 +173,18 @@ func TestSupervisor_MultipleServices(t *testing.T) {
 }
 
 type mockClock struct {
+	clock.Clock
 	now      time.Time
 	tickChan chan time.Time
 }
 
-var _ Clock = &mockClock{}
+var _ clock.Clock = &mockClock{}
 
 func (m *mockClock) Now() time.Time {
 	return m.now
 }
 
-func (m *mockClock) NewTicker(time.Duration) Ticker {
+func (m *mockClock) NewTicker(time.Duration) clock.Ticker {
 	return &mockTicker{timeChan: m.tickChan}
 }
 
@@ -191,7 +192,7 @@ type mockTicker struct {
 	timeChan chan time.Time
 }
 
-var _ Ticker = &mockTicker{}
+var _ clock.Ticker = &mockTicker{}
 
 func (m *mockTicker) C() <-chan time.Time {
 	return m.timeChan
