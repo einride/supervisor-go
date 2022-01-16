@@ -1,13 +1,12 @@
-# go.einride.tech/supervisor
+go.einride.tech/supervisor
+==========================
 
 A service that manages service lifetimes.
 
-A supervisor is essentially a more capable errgroup. It monitors a set
-of running services, and restarts them if they fail.
-The supervisor keeps track of the status of each service and reports any
-status changes to listeners via a callback.
+A supervisor is essentially a more capable errgroup. It monitors a set of running services, and restarts them if they fail. The supervisor keeps track of the status of each service and reports any status changes to listeners via a callback.
 
-## Examples
+Examples
+--------
 
 ### Supervising multiple services
 
@@ -100,7 +99,7 @@ func ExampleRestartOnError() {
 	cfg.Services = append(cfg.Services, svc)
 	s := supervisor.New(&cfg)
 	if err := s.Run(ctx); err != nil {
-        // no error currently returned
+		// no error currently returned
 	}
 	fmt.Println("service restarted", starts, "times")
 	// Output:
