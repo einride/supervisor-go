@@ -60,8 +60,7 @@ func ExampleSupervisor() {
 	// Create the supervisor from the config.
 	s := supervisor.New(&cfg)
 	// Run the supervisor (blocking call).
-	err := s.Run(ctx)
-	if err != nil {
+	if err := s.Run(ctx); err != nil {
 		// handle error
 		panic(err)
 	}
