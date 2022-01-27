@@ -64,7 +64,6 @@ func TestSupervisor_Logger(t *testing.T) {
 
 func TestSupervisor_IgnoreNilService(t *testing.T) {
 	cfg := &Config{
-
 		Logger: testr.NewTestLogger(t),
 	}
 	cfg.Services = append(cfg.Services, nil)
