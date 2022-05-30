@@ -199,6 +199,8 @@ func (m *mockTicker) C() <-chan time.Time {
 
 func (m *mockTicker) Stop() {}
 
+func (m *mockTicker) Reset(_ time.Duration) {}
+
 type testFixture struct {
 	clock           *mockClock
 	restartTickChan chan time.Time
