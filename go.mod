@@ -7,5 +7,5 @@ require (
 	github.com/go-logr/stdr v1.2.2
 	go.einride.tech/clock v0.11.4
 	golang.org/x/sync v0.3.0
-	gotest.tools/v3 v3.5.0
+	gotest.tools/v3 v3.5.1
 )
