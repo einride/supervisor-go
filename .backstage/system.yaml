@@ -1,0 +1,9 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: service-supervisor
+  description: Supervise a service and restart when needed
+spec:
+  owner: team-ads-platform
+  domain: internal-developer-platform

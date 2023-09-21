@@ -1,0 +1,11 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: supervisor-go
+  description: Supervise Go services and restart them on failure
+spec:
+  type: library
+  lifecycle: production
+  owner: team-ads-platform
+  system: service-supervisor
