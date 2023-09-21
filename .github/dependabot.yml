@@ -14,6 +14,13 @@ updates:
       day: "monday"
       time: "05:25"
       timezone: "Europe/Stockholm"
+    groups:
+      go:
+        patterns:
+          - "*"  # Include all dependencies in one PR
+        update-types:
+          - "minor"
+          - "patch"
   - package-ecosystem: gomod
     directory: .sage
     schedule:
