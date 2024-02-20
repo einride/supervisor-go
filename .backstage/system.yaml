@@ -6,4 +6,4 @@ metadata:
   description: Supervise a service and restart when needed
 spec:
   owner: team-ads-platform
-  domain: internal-developer-platform
+  domain: autonomous-vehicle
