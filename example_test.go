@@ -81,7 +81,7 @@ func ExampleNew() {
 	// Create a context that can be canceled inside the service.
 	ctx, cancel := context.WithCancel(context.Background())
 	starts := 0
-	svc := supervisor.NewService("example", func(ctx context.Context) error {
+	svc := supervisor.NewService("example", func(_ context.Context) error {
 		if starts == 3 {
 			cancel()
 			return nil
@@ -106,7 +106,7 @@ func ExampleConfig_StatusUpdateListeners() {
 		RestartInterval: 10 * time.Millisecond,
 		Services: []supervisor.Service{
 			// Create a crashing service.
-			supervisor.NewService("example", func(ctx context.Context) error {
+			supervisor.NewService("example", func(_ context.Context) error {
 				return fmt.Errorf("oops")
 			}),
 		},
