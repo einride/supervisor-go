@@ -80,7 +80,7 @@ func TestSupervisor_RestartOnError(t *testing.T) {
 		Logger: testr.NewTestLogger(t),
 	}
 	rendezvousChan := make(chan struct{})
-	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
+	cfg.Services = append(cfg.Services, NewService("service1", func(_ context.Context) error {
 		rendezvousChan <- struct{}{}
 		return errors.New("boom")
 	}))
@@ -116,7 +116,7 @@ func TestSupervisor_RestartOnPanic(t *testing.T) {
 		Logger: testr.NewTestLogger(t),
 	}
 	rendezvousChan := make(chan struct{})
-	cfg.Services = append(cfg.Services, NewService("service1", func(ctx context.Context) error {
+	cfg.Services = append(cfg.Services, NewService("service1", func(_ context.Context) error {
 		rendezvousChan <- struct{}{}
 		panic("boom")
 	}))
