@@ -1,14 +1,12 @@
 module go.einride.tech/supervisor
 
-go 1.24.0
-
-toolchain go1.24.1
+go 1.25.0
 
 require (
 	github.com/go-logr/logr v1.4.3
 	github.com/go-logr/stdr v1.2.2
 	go.einride.tech/clock v0.12.0
-	golang.org/x/sync v0.19.0
+	golang.org/x/sync v0.20.0
 	gotest.tools/v3 v3.5.2
 )
 
